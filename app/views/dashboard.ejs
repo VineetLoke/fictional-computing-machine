@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - CorpPortal</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        nav {
+            background: #333;
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .box {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #eee;
+            border-radius: 4px;
+        }
+
+        h3 {
+            margin-top: 0;
+        }
+
+        button {
+            padding: 8px 15px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div>CorpPortal Intranet</div>
+        <div>Welcome, <%= user %>
+        </div>
+    </nav>
+    <div class="container">
+        <h2>Employee Resources</h2>
+        <p>Welcome to the internal portal.</p>
+
+        <!-- XSS Vulnerability Entry Point -->
+        <div class="box">
+            <h3>Search Documents</h3>
+            <form action="/search" method="GET">
+                <input type="text" name="q" placeholder="Enter search term..." style="padding: 8px; width: 70%;">
+                <button type="submit">Search</button>
+            </form>
+            <small>Try searching for: &lt;script&gt;alert(1)&lt;/script&gt;</small>
+        </div>
+
+        <!-- File Upload Vulnerability Entry Point -->
+        <div class="box">
+            <h3>Upload Profile Document</h3>
+            <form action="/upload" method="POST" enctype="multipart/form-data">
+                <input type="file" name="document">
+                <button type="submit">Upload</button>
+            </form>
+            <p><small class="text-danger">Allowed types: ANY (Vulnerability! Try uploading a .html file)</small></p>
+        </div>
+    </div>
+</body>
+
+</html>

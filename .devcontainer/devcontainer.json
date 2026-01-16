@@ -1,0 +1,14 @@
+{
+    "name": "Kali Linux Hacking Station",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "remoteUser": "root",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "MS-CEINTL.vscode-language-pack-en"
+            ]
+        }
+    }
+}

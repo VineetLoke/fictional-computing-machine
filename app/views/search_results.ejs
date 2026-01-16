@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Search Results</title>
+</head>
+
+<body>
+    <h1>Search Results</h1>
+    <p>You searched for:</p>
+
+    <!-- VULNERABILITY: <%- %> renders raw HTML in EJS. -->
+    <!-- If query contains <script>alert(1)</script>, it executes. -->
+    <div style="border: 1px solid #ccc; padding: 10px;">
+        <%- query %>
+    </div>
+
+    <a href="/dashboard">Back to Dashboard</a>
+</body>
+
+</html>
