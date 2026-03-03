@@ -20,6 +20,11 @@ Shortcut commands (one-tap from phone):
   /battery   — Battery percentage
   /procs     — Top 10 processes by memory
   /folder    — Open project folder on laptop
+  /lock      — Lock the laptop screen
+  /ip        — Show IP address & hostname
+  /wifi      — Show connected Wi-Fi network
+  /uptime    — Show system uptime
+  /volume    — Show audio volume level
 
 General commands:
   /start     — Welcome message
@@ -101,10 +106,12 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "Control your laptop from here.\n\n"
         "*Quick commands:*\n"
         "/status — System status\n"
-        "/startnav — Open dashboard\n"
-        "/stopnav — Close dashboard\n"
-        "/logs — View listener logs\n"
-        "/ping — Check laptop is alive\n\n"
+        "/ping — Check laptop is alive\n"
+        "/lock — Lock screen\n"
+        "/battery — Battery info\n"
+        "/wifi — Wi-Fi network\n"
+        "/ip — IP address\n"
+        "/uptime — System uptime\n\n"
         "Type /help for the full list.",
         parse_mode="Markdown",
     )
@@ -126,6 +133,11 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "/battery — Battery level & charging state",
         "/procs — Top 10 processes by memory",
         "/folder — Open project folder in file manager",
+        "/lock — Lock the laptop screen",
+        "/ip — Show IP address & hostname",
+        "/wifi — Show connected Wi-Fi network",
+        "/uptime — Show how long laptop has been running",
+        "/volume — Show audio volume level",
         "",
         "*━━━ General Commands ━━━*\n",
         "/health — Check cloud agent status",
@@ -312,6 +324,11 @@ BOT_COMMANDS = [
     BotCommand("battery", "Battery level"),
     BotCommand("procs", "Top processes by memory"),
     BotCommand("folder", "Open project folder"),
+    BotCommand("lock", "Lock laptop screen"),
+    BotCommand("ip", "IP address & hostname"),
+    BotCommand("wifi", "Connected Wi-Fi network"),
+    BotCommand("uptime", "System uptime"),
+    BotCommand("volume", "Audio volume level"),
     BotCommand("health", "Cloud agent status"),
     BotCommand("myid", "Show your chat ID"),
     BotCommand("run", "Run any whitelisted action"),

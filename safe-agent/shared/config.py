@@ -101,6 +101,31 @@ WHITELISTED_ACTIONS: dict[str, dict] = {
         "function": "list_running_processes",
         "args": [],
     },
+    "lock_screen": {
+        "description": "Lock the laptop screen immediately.",
+        "function": "lock_screen",
+        "args": [],
+    },
+    "get_ip_address": {
+        "description": "Show local IP address and hostname.",
+        "function": "get_ip_address",
+        "args": [],
+    },
+    "get_wifi_name": {
+        "description": "Show the currently connected Wi-Fi network.",
+        "function": "get_wifi_name",
+        "args": [],
+    },
+    "get_uptime": {
+        "description": "Show how long the laptop has been running.",
+        "function": "get_uptime",
+        "args": [],
+    },
+    "get_volume_level": {
+        "description": "Show current system audio volume level.",
+        "function": "get_volume_level",
+        "args": [],
+    },
 }
 
 # Pre-computed set for O(1) lookup
@@ -120,4 +145,9 @@ COMMAND_SHORTCUTS: dict[str, str] = {
     "battery": "get_battery_status",
     "procs": "list_running_processes",
     "folder": "open_project_folder",
+    "lock": "lock_screen",
+    "ip": "get_ip_address",
+    "wifi": "get_wifi_name",
+    "uptime": "get_uptime",
+    "volume": "get_volume_level",
 }

@@ -254,6 +254,186 @@ def list_running_processes() -> str:
 
 
 # ──────────────────────────────────────────────
+# Action: lock_screen
+# ──────────────────────────────────────────────
+def lock_screen() -> str:
+    """Lock the computer screen — safe, protects the laptop."""
+    try:
+        if IS_WINDOWS:
+            subprocess.run(
+                ["rundll32.exe", "user32.dll,LockWorkStation"],
+                timeout=5,
+            )
+            return "Screen locked."
+        elif IS_MAC:
+            subprocess.run(
+                ["pmset", "displaysleepnow"],
+                timeout=5,
+            )
+            return "Screen locked (display sleep)."
+        else:
+            # Linux — try common screen lockers
+            for cmd in [["loginctl", "lock-session"], ["xdg-screensaver", "lock"]]:
+                try:
+                    subprocess.run(cmd, timeout=5)
+                    return "Screen locked."
+                except FileNotFoundError:
+                    continue
+            return "No supported screen locker found."
+    except Exception as exc:
+        return f"Could not lock screen: {exc}"
+
+
+# ──────────────────────────────────────────────
+# Action: get_ip_address
+# ──────────────────────────────────────────────
+def get_ip_address() -> str:
+    """Return the machine's local and public-facing IP addresses."""
+    import socket
+
+    lines = []
+
+    # Local IP
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        local_ip = s.getsockname()[0]
+        s.close()
+        lines.append(f"Local IP  : {local_ip}")
+    except Exception:
+        lines.append("Local IP  : (unavailable)")
+
+    # Hostname
+    try:
+        lines.append(f"Hostname  : {socket.gethostname()}")
+    except Exception:
+        pass
+
+    return "\n".join(lines) if lines else "Could not determine IP address."
+
+
+# ──────────────────────────────────────────────
+# Action: get_wifi_name
+# ──────────────────────────────────────────────
+def get_wifi_name() -> str:
+    """Return the currently connected Wi-Fi network name (SSID)."""
+    try:
+        if IS_WINDOWS:
+            result = subprocess.run(
+                ["netsh", "wlan", "show", "interfaces"],
+                capture_output=True, text=True, timeout=5,
+            )
+            for line in result.stdout.splitlines():
+                if "SSID" in line and "BSSID" not in line:
+                    return f"Wi-Fi: {line.split(':', 1)[1].strip()}"
+            return "Not connected to Wi-Fi."
+        elif IS_MAC:
+            result = subprocess.run(
+                ["/System/Library/PrivateFrameworks/Apple80211.framework/"
+                 "Versions/Current/Resources/airport", "-I"],
+                capture_output=True, text=True, timeout=5,
+            )
+            for line in result.stdout.splitlines():
+                if " SSID:" in line:
+                    return f"Wi-Fi: {line.split(':', 1)[1].strip()}"
+            return "Not connected to Wi-Fi."
+        else:
+            result = subprocess.run(
+                ["iwgetid", "-r"],
+                capture_output=True, text=True, timeout=5,
+            )
+            ssid = result.stdout.strip()
+            return f"Wi-Fi: {ssid}" if ssid else "Not connected to Wi-Fi."
+    except FileNotFoundError:
+        return "Wi-Fi command not available on this system."
+    except Exception as exc:
+        return f"Could not get Wi-Fi name: {exc}"
+
+
+# ──────────────────────────────────────────────
+# Action: get_uptime
+# ──────────────────────────────────────────────
+def get_uptime() -> str:
+    """Return how long the system has been running."""
+    try:
+        if IS_WINDOWS:
+            result = subprocess.run(
+                ["wmic", "os", "get", "LastBootUpTime"],
+                capture_output=True, text=True, timeout=5,
+            )
+            lines = [l.strip() for l in result.stdout.strip().splitlines() if l.strip()]
+            if len(lines) >= 2:
+                boot_str = lines[-1]  # e.g., "20250101120000.000000+060"
+                # Parse WMI datetime
+                boot_time = datetime.datetime(
+                    int(boot_str[:4]), int(boot_str[4:6]), int(boot_str[6:8]),
+                    int(boot_str[8:10]), int(boot_str[10:12]), int(boot_str[12:14]),
+                )
+                delta = datetime.datetime.now() - boot_time
+                hours, remainder = divmod(int(delta.total_seconds()), 3600)
+                minutes = remainder // 60
+                return f"Uptime: {hours}h {minutes}m (since {boot_time.isoformat()})"
+            return "Could not parse boot time."
+        else:
+            # Linux / macOS — read /proc/uptime or use 'uptime' command
+            uptime_file = Path("/proc/uptime")
+            if uptime_file.exists():
+                secs = float(uptime_file.read_text().split()[0])
+                hours, remainder = divmod(int(secs), 3600)
+                minutes = remainder // 60
+                return f"Uptime: {hours}h {minutes}m"
+            result = subprocess.run(
+                ["uptime"], capture_output=True, text=True, timeout=5,
+            )
+            return result.stdout.strip()
+    except Exception as exc:
+        return f"Could not get uptime: {exc}"
+
+
+# ──────────────────────────────────────────────
+# Action: get_volume_level
+# ──────────────────────────────────────────────
+def get_volume_level() -> str:
+    """Return the current system audio volume level."""
+    try:
+        if IS_WINDOWS:
+            # Use PowerShell to read audio endpoint master volume
+            ps_cmd = (
+                "(Get-AudioDevice -PlaybackVolume).ToString() + '%'"
+            )
+            # Fallback: use simpler method via registry or nircmd
+            # Most reliable on Windows without extra tools:
+            result = subprocess.run(
+                ["powershell", "-Command",
+                 "[Audio.Volume]::GetMasterVolume()"],
+                capture_output=True, text=True, timeout=5,
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                return f"Volume: {result.stdout.strip()}"
+            # Fallback message
+            return "Volume level: (install AudioDeviceCmdlets for exact %, or check system tray)"
+        elif IS_MAC:
+            result = subprocess.run(
+                ["osascript", "-e", "output volume of (get volume settings)"],
+                capture_output=True, text=True, timeout=5,
+            )
+            return f"Volume: {result.stdout.strip()}%"
+        else:
+            result = subprocess.run(
+                ["amixer", "get", "Master"],
+                capture_output=True, text=True, timeout=5,
+            )
+            for line in result.stdout.splitlines():
+                if "%" in line:
+                    return f"Volume: {line.strip()}"
+            return "Could not determine volume level."
+    except FileNotFoundError:
+        return "Audio command not available on this system."
+    except Exception as exc:
+        return f"Could not get volume: {exc}"
+
+
+# ──────────────────────────────────────────────
 # Action registry — maps function names to callables
 # ──────────────────────────────────────────────
 # SAFETY: This is the ONLY mapping used to dispatch actions.
@@ -268,4 +448,9 @@ ACTION_REGISTRY: dict[str, callable] = {
     "send_log_file": send_log_file,
     "open_project_folder": open_project_folder,
     "list_running_processes": list_running_processes,
+    "lock_screen": lock_screen,
+    "get_ip_address": get_ip_address,
+    "get_wifi_name": get_wifi_name,
+    "get_uptime": get_uptime,
+    "get_volume_level": get_volume_level,
 }
