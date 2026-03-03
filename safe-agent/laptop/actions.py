@@ -157,15 +157,16 @@ def get_battery_status() -> str:
 # Action: start_navigation_dashboard
 # ──────────────────────────────────────────────
 def start_navigation_dashboard() -> str:
-    """Open a simple dashboard URL in the default browser."""
+    """Open the cloud agent dashboard URL in the default browser."""
     global _dashboard_process
     if _dashboard_process and _dashboard_process.poll() is None:
         return "Dashboard is already running."
 
-    url = "http://localhost:8000/docs"  # Default: cloud agent's Swagger UI
+    # Use CLOUD_AGENT_URL from env so it opens the Codespace URL, not localhost
+    base_url = os.environ.get("CLOUD_AGENT_URL", "http://localhost:8000")
+    url = base_url.rstrip("/") + "/docs"
     try:
         if IS_WINDOWS:
-            # os.startfile is the safe Windows way to open URLs
             os.startfile(url)  # noqa: S606 — safe: opens URL in default browser
             return f"Dashboard opened: {url}"
         elif IS_MAC:
@@ -229,9 +230,9 @@ def list_running_processes() -> str:
     """Return top 10 processes by memory usage — works on Windows and Linux."""
     try:
         if IS_WINDOWS:
-            # tasklist is the safe Windows equivalent of ps
+            # tasklist with no extra flags works on all Windows versions
             result = subprocess.run(
-                ["tasklist", "/SortMem", "/FI", "STATUS eq running"],
+                ["tasklist"],
                 capture_output=True, text=True, timeout=10,
             )
             lines = result.stdout.strip().splitlines()
