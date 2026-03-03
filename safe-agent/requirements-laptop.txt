@@ -1,0 +1,4 @@
+# Minimal deps for the laptop listener only.
+# Install this on your laptop to keep footprint small.
+requests==2.32.*
+python-dotenv==1.1.*

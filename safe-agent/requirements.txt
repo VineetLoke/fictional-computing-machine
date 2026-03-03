@@ -1,0 +1,11 @@
+# ── Cloud Agent + Telegram Bot ────────────────
+# Run these in Codespaces / Colab / cloud host
+fastapi==0.115.*
+uvicorn[standard]==0.34.*
+python-telegram-bot==21.*
+httpx==0.28.*
+python-dotenv==1.1.*
+
+# ── Laptop Listener ──────────────────────────
+# Only needs 'requests' beyond stdlib
+requests==2.32.*

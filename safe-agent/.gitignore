@@ -1,0 +1,6 @@
+# Ignore real .env files — they contain secrets
+.env
+__pycache__/
+*.pyc
+laptop/logs/
+.venv/
