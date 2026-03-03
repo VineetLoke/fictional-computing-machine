@@ -1,4 +1,5 @@
-const express = require('express');
+cd /workspaces/fictional-computing-machine/safe-agent
+cp .env.example .envconst express = require('express');
 const fs = require('fs');
 const path = require('path');
 const morgan = require('morgan');
